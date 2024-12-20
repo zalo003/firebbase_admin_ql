@@ -1,0 +1,24 @@
+{
+  "include": ["src"],
+  "exclude": ["node_modules", "dist", "esm"],
+  "compilerOptions": {
+    "noImplicitAny": true,
+    "removeComments": true,
+    "preserveConstEnums": true,
+    "module": "CommonJS",                   // Use CommonJS for Node.js
+    "esModuleInterop": true,
+    "target": "ES6",                        // Modern JavaScript support
+    "moduleResolution": "node",
+    "sourceMap": true,
+    "outDir": "./dist/",
+    "strict": true,
+    "forceConsistentCasingInFileNames": true,
+    "declaration": true,                    // Generate .d.ts files
+    "skipLibCheck": true,
+    "allowSyntheticDefaultImports": true,
+    "noFallthroughCasesInSwitch": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "lib": ["ESNext"]                       // Remove DOM if not used
+  }
+}

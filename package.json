@@ -1,0 +1,46 @@
+{
+  "name": "firebbase_admin_ql",
+  "version": "1.0.0",
+  "types": "dist/index.d.ts",
+  "description": "A powerful library that bridges Firebase Admin SDK with PostgreSQL, simplifies interaction with stored procedures, facilitates seamless third-party API calls using fetch, and provides utility functions to  streamline backend operations.",
+  "main": "dist/index.js",
+  "keywords": [
+    "firebase",
+    "firebase-admin",
+    "postgresql",
+    "stored-procedures",
+    "database-integration",
+    "api-fetch",
+    "utilities",
+    "backend-tools",
+    "nodejs",
+    "typescript",
+    "firebase-postgresql",
+    "third-party-api",
+    "server-sdk",
+    "firebase-integration"
+  ],
+  "scripts": {
+    "test": "jest",
+    "build": "tsc",
+    "prepublishOnly": "npm run build",
+    "postpublish": "git add . && git commit -m 'chore: publish new version' && git push"
+  },
+  "author": "Breedware Limited",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/jest": "^29.5.14",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.2.5",
+    "ts-node": "^10.9.2",
+    "tsconfig-paths": "^4.2.0",
+    "typescript": "^5.7.2"
+  },
+  "dependencies": {
+    "@types/pg": "^8.11.10",
+    "firebase-admin": "^13.0.2",
+    "firebase-functions": "^6.2.0",
+    "knex": "^3.1.0",
+    "pg": "^8.13.1"
+  }
+}
