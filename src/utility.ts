@@ -28,6 +28,12 @@ export function generateOTP(num: number): string {
     return OTP;
 }
 
+export type Message = {
+  status: "success" | "error",
+  message: string,
+  data?: object
+}
+
 
 /**
  * A class to manage form data for database queries, maintaining a specific order of the values.

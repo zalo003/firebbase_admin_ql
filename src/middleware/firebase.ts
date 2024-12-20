@@ -1,9 +1,4 @@
-import { AppCheckData, CallableRequest } from "firebase-functions/lib/common/providers/https";
-import { HttpsError } from "firebase-functions/v2/https";
-import { AuthData } from "firebase-functions/v2/tasks";
-import { Message } from "../interfaces";
-
-
+import { Message } from "../utility";
 
 /**
  * Middleware function to verify if the request is from an App Check verified app.
@@ -13,10 +8,9 @@ import { Message } from "../interfaces";
  * @param {Function} next - The callback function to pass control to the next middleware if the app is verified.
  * @throws {HttpsError} Throws an HttpsError if the app is not verified.
  */
-export const isConfirmedApp = (app: AppCheckData | undefined, next: Function) => {
+export const isConfirmedApp = (app: object | undefined, next: Function) => {
   if (app === undefined) {
-    throw new HttpsError(
-      "failed-precondition",
+    throw new Error(
       "The function must be called from an App Check verified app."
     );
   }
@@ -32,10 +26,9 @@ export const isConfirmedApp = (app: AppCheckData | undefined, next: Function) =>
  * @param {Function} next - The callback function to pass control to the next middleware if the user is authorized.
  * @throws {HttpsError} Throws an HttpsError if the user is not authorized.
  */
-export const isAuthorizedUser = (auth: AuthData | undefined, next: Function) => {
+export const isAuthorizedUser = (auth: object | undefined, next: Function) => {
   if (auth === undefined) {
-    throw new HttpsError(
-      "failed-precondition",
+    throw new Error(
       "The function must be called by an authorized user"
     );
   }
@@ -57,7 +50,7 @@ export const isAuthorizedUser = (auth: AuthData | undefined, next: Function) => 
  */
 export const chainMiddlewares = async (
   middlewares: Function[],
-  request: CallableRequest<any>,
+  request: any,
   handler: Function
 ): Promise<Message> => {
   const execute = async (index: number): Promise<any> => {

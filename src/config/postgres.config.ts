@@ -1,5 +1,4 @@
-import { logger } from "firebase-functions/v2";
-import { Message } from "../interfaces";
+import { Message } from "../utility";
 
 /**
  * The `PgDatabase` class provides a wrapper for interacting with a PostgreSQL database using Knex.js.
@@ -66,13 +65,13 @@ export class PgDatabase {
       const result = await this.db.raw(query, parameters);
 
       // Log the result of the stored procedure execution
-      logger.log("Stored db method result:", result);
+      console.log("Stored db method result:", result);
       
       // Return the first result of the stored procedure's return value
       return result.rows[0]["f_return_value"];
     } catch (error) {
       // Log and throw an error if the execution fails
-      logger.error("Error executing stored method:", error);
+      console.log("Error executing stored method:", error);
       throw new Error("Unable to run current transaction: " + error);
     } finally {
       // Close the database connection after executing the query

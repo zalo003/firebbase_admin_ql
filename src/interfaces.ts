@@ -8,10 +8,3 @@ export type whereClause = {
   operator: WhereFilterOp;
   value: unknown;
 };
-
-
-export interface Message {
-    status: "success" | "error",
-    message: string,
-    data?: object
-}

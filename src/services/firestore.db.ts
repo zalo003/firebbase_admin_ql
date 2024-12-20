@@ -1,5 +1,4 @@
 import { CollectionReference, DocumentData, FieldValue, Firestore } from "firebase-admin/firestore";
-import { logger } from "firebase-functions/v2";
 import { whereClause } from "../interfaces";
 
 /**
@@ -34,7 +33,7 @@ export class FirebaseModel {
         }
       } catch (error) {
         // unable to find data
-        logger.log("find: ", error);
+        console.log("find: ", error);
         return false;
       }
     }
@@ -48,7 +47,7 @@ export class FirebaseModel {
       try {
         return (await this.collection.doc(id).get()).exists;
       } catch (error) {
-        logger.log("data exists: ", error);
+        console.log("data exists: ", error);
         return false;
       }
     }
@@ -64,7 +63,7 @@ export class FirebaseModel {
         await this.collection.doc(id).update(data);
         return true;
       } catch (error) {
-        logger.log("update: ", error);
+        console.log("update: ", error);
         return false;
       }
     }
@@ -89,7 +88,7 @@ export class FirebaseModel {
           return (await this.collection.get()).docs;
         }
       } catch (error) {
-        logger.log("findAll: ", error);
+        console.log("findAll: ", error);
         return [];
       }
     }
@@ -136,7 +135,7 @@ export class FirebaseModel {
           return id;
         }
       } catch (error) {
-        logger.log("save: ", error);
+        console.log("save: ", error);
         return false;
       }
     }
@@ -151,7 +150,7 @@ export class FirebaseModel {
         await this.collection.doc(id).delete();
         return true;
       } catch (error) {
-        logger.log("delete: ", error);
+        console.log("delete: ", error);
         return false;
       }
     }
@@ -224,7 +223,7 @@ export class FirebaseModel {
           (itemExist as any).reference
         );
       } catch (error) {
-        logger.log("firestore backup error: ", error);
+        console.log("firestore backup error: ", error);
         return false;
       }
     }
