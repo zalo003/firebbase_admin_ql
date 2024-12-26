@@ -1,6 +1,6 @@
 {
   "name": "firebase-admin-ql",
-  "version": "2.0.2",
+  "version": "2.1.0",
   "types": "dist/index.d.ts",
   "description": "A powerful library that bridges Firebase Admin SDK with PostgreSQL, simplifies interaction with stored procedures, facilitates seamless third-party API calls using fetch, and provides utility functions to  streamline backend operations.",
   "main": "dist/index.js",
@@ -24,7 +24,7 @@
     "test": "jest",
     "build": "tsc",
     "prepublishOnly": "npm run build",
-    "postpublish": "git add . && git commit -m 'chore: publish new version' && git push"
+    "postpublish": "git push"
   },
   "author": "Breedware Limited",
   "license": "ISC",

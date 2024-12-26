@@ -30,13 +30,10 @@ export class PgDatabase {
    */
   constructor(
     schema: string,
-    connectionOptions: any
+    db: any
   ) {
     // Initialize the Knex.js client with PostgreSQL connection options
-    this.db = require("knex")({
-      client: "pg",
-      connection: connectionOptions,
-    });
+    this.db = db;
     this.schema = schema;
   }
 
@@ -66,7 +63,7 @@ export class PgDatabase {
       const result = await this.db.raw(query, parameters);
 
       // Log the result of the stored procedure execution
-      logger.log("Stored db method result:", result);
+      logger.log("logger log method result:", result);
       
       // Return the first result of the stored procedure's return value
       return result.rows[0]["f_return_value"];
