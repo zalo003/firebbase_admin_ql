@@ -1,5 +1,6 @@
 import { CollectionReference, DocumentData, FieldValue, Firestore } from "firebase-admin/firestore";
 import { whereClause } from "../interfaces";
+import { logger } from "firebase-functions/v2";
 
 /**
  * Represents a Firebase model for interacting with Firestore collections.
@@ -33,7 +34,7 @@ export class FirebaseModel {
         }
       } catch (error) {
         // unable to find data
-        console.log("find: ", error);
+        logger.log("find: ", error);
         return false;
       }
     }
@@ -47,7 +48,7 @@ export class FirebaseModel {
       try {
         return (await this.collection.doc(id).get()).exists;
       } catch (error) {
-        console.log("data exists: ", error);
+        logger.log("data exists: ", error);
         return false;
       }
     }
@@ -63,7 +64,7 @@ export class FirebaseModel {
         await this.collection.doc(id).update(data);
         return true;
       } catch (error) {
-        console.log("update: ", error);
+        logger.log("update: ", error);
         return false;
       }
     }
@@ -88,7 +89,7 @@ export class FirebaseModel {
           return (await this.collection.get()).docs;
         }
       } catch (error) {
-        console.log("findAll: ", error);
+        logger.log("findAll: ", error);
         return [];
       }
     }
@@ -135,7 +136,7 @@ export class FirebaseModel {
           return id;
         }
       } catch (error) {
-        console.log("save: ", error);
+        logger.log("save: ", error);
         return false;
       }
     }
@@ -150,7 +151,7 @@ export class FirebaseModel {
         await this.collection.doc(id).delete();
         return true;
       } catch (error) {
-        console.log("delete: ", error);
+        logger.log("delete: ", error);
         return false;
       }
     }
@@ -223,7 +224,7 @@ export class FirebaseModel {
           (itemExist as any).reference
         );
       } catch (error) {
-        console.log("firestore backup error: ", error);
+        logger.log("firestore backup error: ", error);
         return false;
       }
     }

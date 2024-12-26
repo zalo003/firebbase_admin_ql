@@ -9,7 +9,7 @@
  *
  * @example
  * const otp = generateOTP(6);
- * console.log(otp); // Example Output: "483920"
+ * logger.log(otp); // Example Output: "483920"
  *
  * @throws {Error} Will throw an error if `num` is less than 4 or not a positive integer.
  */

@@ -1,3 +1,4 @@
+import { logger } from "firebase-functions/v2";
 
 /**
  * http caller fro api
@@ -48,10 +49,10 @@ export class APIFetcher {
           body: JSON.stringify(this._body),
         }
       );
-      console.log("api response: ", response);
+      logger.log("api response: ", response);
       return response;
     } catch (error) {
-      console.log("api error: ", error);
+      logger.log("api error: ", error);
     }
     return;
   };

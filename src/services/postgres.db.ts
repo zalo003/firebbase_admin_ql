@@ -2,6 +2,7 @@ import { Firestore } from "firebase-admin/firestore";
 import { PgDatabase } from "../config/postgres.config";
 import { Message, PgFormData } from "../utility";
 import { FirebaseModel } from "./firestore.db";
+import { logger } from "firebase-functions/v2";
 
 /**
  * The `BaseProcedure` class extends the `PgDatabase` class and provides an abstraction for executing PostgreSQL stored procedures and optionally backing up data to a Firestore database.
@@ -74,7 +75,7 @@ export class PgBaseModel extends PgDatabase {
             return returnValue;
         } catch (error) {
             // Log and handle errors
-            console.log('pg call error: ', error);
+            logger.log('pg call error: ', error);
             return {
                 status: 'error',
                 message: 'Unable to complete process'
