@@ -78,4 +78,25 @@ export class PgFormData {
       });
     }
   }
+
+ 
+
+  /**
+ * Formats a number or string as money in thousands.
+ * @param {number|string} input - The number or string to format.
+ * @returns {string} - The formatted string in thousands.
+ */
+export function formatAsMoney(input: number | string) {
+  // Ensure input is a number
+  const number = Number(input);
+  if (isNaN(number)) {
+      throw new Error("Invalid input: Please provide a valid number or numeric string.");
+  }
+
+  // Format number with commas
+  return number.toLocaleString('en-US', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+  });
+}
   
