@@ -30,10 +30,13 @@ export class PgDatabase {
    */
   constructor(
     schema: string,
-    db: any
+    connectionOptions: any
   ) {
     // Initialize the Knex.js client with PostgreSQL connection options
-    this.db = db;
+    this.db = require("knex")({
+      client: "pg",
+      connection: connectionOptions,
+    });;
     this.schema = schema;
   }
 

@@ -31,8 +31,8 @@ export class PgBaseModel extends PgDatabase {
      * @param {string} procedure - The name of the stored procedure to be executed.
      * @param {string[]} order - The order of the parameters to be passed to the stored procedure.
      */
-    constructor(schema: string, procedure: string, order: string[], db: any, firestoreDB: Firestore) {
-        super(schema, db);
+    constructor(schema: string, procedure: string, order: string[], connectionOptions: any, firestoreDB: Firestore) {
+        super(schema, connectionOptions);
         this.procedure = procedure;
         this.order = order;
         this.firestoreDB = firestoreDB;
