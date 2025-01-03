@@ -48,7 +48,7 @@ export class PgBaseModel extends PgDatabase {
      * 
      * @returns {Promise<Message>} A promise that resolves with the result of the stored procedure or an error message.
      */
-    async call(formData: object, backupDb?: string, key?: string | string[], dbLabel?: string): Promise<Message> {
+    async call(formData: object, backupDb?: string, key?: string | string[], dbLabel?: string, firestorReference?: string): Promise<Message> {
         try {
             // Create an instance of PgFormData to format the form data in the correct order
             const pgForm = new PgFormData(formData, this.order);
@@ -65,7 +65,8 @@ export class PgBaseModel extends PgDatabase {
                 const reference = await fireDb.doBackup({
                     whereKey: key,
                     returnData: returnValue.data as object,
-                    dbLabel
+                    dbLabel,
+                    reference: firestorReference
                 });
                 // Include the reference in the returned data
                 returnValue.data = { reference, ...returnValue.data };

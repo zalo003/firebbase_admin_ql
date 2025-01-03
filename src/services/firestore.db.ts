@@ -194,35 +194,41 @@ export class FirebaseModel {
       whereKey,
       returnData,
       dbLabel,
+      reference
     }: {
-      whereKey: string | string[];
-      returnData: object;
-      dbLabel: string;
+      whereKey: string | string[],
+      returnData: object,
+      dbLabel: string,
+      reference?: string
     }): Promise<boolean | string> {
       try {
-        const where: whereClause[] = [];
-        if (typeof whereKey === "string") {
-          where.push({
-            key: whereKey,
-            operator: "==",
-            value: (returnData as any)[dbLabel][whereKey],
-          });
+        let ref;
+        if(reference){
+          ref = reference;
         } else {
-          whereKey.forEach((key) => {
+          const where: whereClause[] = [];
+          if (typeof whereKey === "string") {
             where.push({
-              key,
+              key: whereKey,
               operator: "==",
-              value: (returnData as any)[dbLabel][key],
+              value: (returnData as any)[dbLabel][whereKey],
             });
-          });
+          } else {
+            whereKey.forEach((key) => {
+              where.push({
+                key,
+                operator: "==",
+                value: (returnData as any)[dbLabel][key],
+              });
+            });
+          }
+          const itemExist = await this.findWhere({ wh: where });
+          ref = itemExist[0].reference
         }
-        const itemExist = await this.findWhere({ wh: where });
   
         // Backup return value to Firestore
         return await this.save(
-          (returnData as any)[dbLabel],
-          (itemExist as any).reference
-        );
+          (returnData as any)[dbLabel],  ref);
       } catch (error) {
         logger.log("firestore backup error: ", error);
         return false;
