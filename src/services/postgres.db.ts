@@ -41,15 +41,12 @@ export class PgBaseModel extends PgDatabase {
     /**
      * Executes the stored procedure with the provided form data and optionally backs up the data to Firestore.
      * 
-     * @param {object} formData - The data to be passed to the stored procedure.
-     * @param {FirebaseTable} [backupDb] - Optional Firestore table to back up the data.
-     * @param {string | string[]} [key] - Optional key(s) to identify the document for backup.
-     * @param {string} [dbLabel] - Optional label for the Firestore database.
-     * 
+     * @param {object} dbData
      * @returns {Promise<Message>} A promise that resolves with the result of the stored procedure or an error message.
      */
-    async call(formData: object, backupDb?: string, key?: string | string[], dbLabel?: string, firestorReference?: string): Promise<Message> {
+    async call(dbData: {formData: object, backupDb?: string, key?: string | string[], dbLabel?: string, firestorReference?: string}): Promise<Message> {
         try {
+            const { formData, backupDb, key, dbLabel, firestorReference } = dbData;
             // Create an instance of PgFormData to format the form data in the correct order
             const pgForm = new PgFormData(formData, this.order);
 
