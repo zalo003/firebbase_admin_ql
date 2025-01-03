@@ -196,7 +196,7 @@ export class FirebaseModel {
       dbLabel,
       reference
     }: {
-      whereKey: string | string[],
+      whereKey?: string | string[],
       returnData: object,
       dbLabel: string,
       reference?: string
@@ -205,7 +205,7 @@ export class FirebaseModel {
         let ref;
         if(reference){
           ref = reference;
-        } else {
+        } else if(whereKey) {
           const where: whereClause[] = [];
           if (typeof whereKey === "string") {
             where.push({

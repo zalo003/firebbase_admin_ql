@@ -57,7 +57,7 @@ export class PgBaseModel extends PgDatabase {
             );
 
             // If the stored procedure was successful and backup parameters are provided, back up data to Firestore
-            if (returnValue.status === 'success' && backupDb && key && dbLabel) {
+            if (returnValue.status === 'success' && backupDb && dbLabel) {
                 const fireDb = new FirebaseModel(backupDb, this.firestoreDB);
                 const reference = await fireDb.doBackup({
                     whereKey: key,
