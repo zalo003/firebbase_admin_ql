@@ -4,6 +4,18 @@ import { Message, PgFormData } from "../utility";
 import { FirebaseModel } from "./firestore.db";
 import { logger } from "firebase-functions/v2";
 
+type PgBackup = {
+    backupDb: string, 
+    whereKeys?: string | string[], 
+    dbLabel: string, 
+    firestorReference?: string
+}
+
+type DBData = {
+    formData: object,
+    backups?: PgBackup[]
+};
+
 /**
  * The `BaseProcedure` class extends the `PgDatabase` class and provides an abstraction for executing PostgreSQL stored procedures and optionally backing up data to a Firestore database.
  * It handles calling the stored procedure, processing the results, and saving the data to Firestore if necessary.
@@ -44,9 +56,9 @@ export class PgBaseModel extends PgDatabase {
      * @param {object} dbData
      * @returns {Promise<Message>} A promise that resolves with the result of the stored procedure or an error message.
      */
-    async call(dbData: {formData: object, backupDb?: string, key?: string | string[], dbLabel?: string, firestorReference?: string}): Promise<Message> {
+    async call(dbData: DBData): Promise<Message> {
         try {
-            const { formData, backupDb, key, dbLabel, firestorReference } = dbData;
+            const { formData, backups } = dbData;
             // Create an instance of PgFormData to format the form data in the correct order
             const pgForm = new PgFormData(formData, this.order);
 
@@ -57,16 +69,17 @@ export class PgBaseModel extends PgDatabase {
             );
 
             // If the stored procedure was successful and backup parameters are provided, back up data to Firestore
-            if (returnValue.status === 'success' && backupDb && dbLabel) {
-                const fireDb = new FirebaseModel(backupDb, this.firestoreDB);
-                const reference = await fireDb.doBackup({
-                    whereKey: key,
-                    returnData: returnValue.data as object,
-                    dbLabel,
-                    reference: firestorReference
-                });
-                // Include the reference in the returned data
-                returnValue.data = { reference, ...returnValue.data };
+            if (returnValue.status === 'success' && backups) {
+                await Promise.all(backups.map((pgBackup)=>{
+                    const {backupDb, whereKeys, dbLabel, firestorReference} = pgBackup;
+                    return this.saveToFirestore(
+                        backupDb,
+                        dbLabel,
+                        returnValue.data as Object,
+                        whereKeys,
+                        firestorReference
+                    );
+                }));
             }
 
             // Return the result of the procedure execution
@@ -79,5 +92,18 @@ export class PgBaseModel extends PgDatabase {
                 message: 'Unable to complete process'
             };
         }
+    }
+
+    // save item to firestore
+    private async saveToFirestore(backupDb: string, dbLabel: string, data: object, key?: string | string[],   firestorReference?: string){
+        const fireDb = new FirebaseModel(backupDb, this.firestoreDB);
+        const reference = await fireDb.doBackup({
+            whereKey: key,
+            returnData: data,
+            dbLabel,
+            reference: firestorReference
+        });
+        // Include the reference in the returned data
+        // returnValue.data = { reference, ...returnValue.data };
     }
 }
