@@ -202,7 +202,7 @@ export class FirebaseModel {
       reference?: string
     }): Promise<boolean | string> {
       try {
-        let ref;
+        let ref = undefined;
         if(reference){
           ref = reference;
         } else if(whereKey) {
@@ -223,12 +223,13 @@ export class FirebaseModel {
             });
           }
           const itemExist = await this.findWhere({ wh: where });
-          ref = itemExist[0].reference
+          if(itemExist.length > 0){
+            ref = itemExist[0].reference
+          }
         }
   
         // Backup return value to Firestore
-        return await this.save(
-          (returnData as any)[dbLabel],  ref);
+        return await this.save((returnData as any)[dbLabel],  ref);
       } catch (error) {
         logger.log("firestore backup error: ", error);
         return false;

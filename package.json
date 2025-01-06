@@ -1,6 +1,6 @@
 {
   "name": "firebase-admin-ql",
-  "version": "4.0.0",
+  "version": "4.0.1",
   "types": "dist/index.d.ts",
   "description": "A powerful library that bridges Firebase Admin SDK with PostgreSQL, simplifies interaction with stored procedures, facilitates seamless third-party API calls using fetch, and provides utility functions to  streamline backend operations.",
   "main": "dist/index.js",
