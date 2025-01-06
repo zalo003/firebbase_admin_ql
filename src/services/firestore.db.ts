@@ -1,4 +1,4 @@
-import { CollectionReference, DocumentData, FieldValue, Firestore } from "firebase-admin/firestore";
+import { CollectionReference, DocumentData, FieldValue, Firestore, QuerySnapshot } from "firebase-admin/firestore";
 import { whereClause } from "../interfaces";
 import { logger } from "firebase-functions/v2";
 
@@ -7,7 +7,7 @@ import { logger } from "firebase-functions/v2";
  */
 export class FirebaseModel {
     db: Firestore;
-    collection: CollectionReference<DocumentData>;
+    collection: CollectionReference<DocumentData> | any;
   
     /**
      * Initializes the FirebaseModel class with the Firestore database instance and the document collection name.
@@ -102,11 +102,17 @@ export class FirebaseModel {
      */
     async findWhere({ wh }: { wh: whereClause[] }): Promise<DocumentData[]> {
       try {
-        wh.forEach((clause) =>
-          this.collection.where(clause.key, clause.operator, clause.value)
-        );
-        const snapshot = await this.collection.get();
-  
+        // Start with the collection reference
+        let query = this.collection;
+    
+        // Apply each where clause to the query
+        for (const clause of wh) {
+          query = query.where(clause.key, clause.operator, clause.value);
+        }
+    
+        // Execute the query
+        const snapshot = await query.get() as QuerySnapshot;
+    
         if (!snapshot.empty) {
           return snapshot.docs.map((document) => {
             return { ...document.data(), reference: document.id };
@@ -115,9 +121,10 @@ export class FirebaseModel {
           return [];
         }
       } catch (error) {
-        throw new Error(`findWhere: , ${error}`);
+        throw new Error(`findWhere: ${error}`);
       }
     }
+    
   
     /**
      * Creates a new document or updates an existing document with the provided data in the Firestore collection.
