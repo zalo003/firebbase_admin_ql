@@ -52,22 +52,28 @@ export class PgDatabase {
   async runStoredMethod(methodName: string, parameters: any[] = []): Promise<Message> {
     const exists = await this.procedureExists(methodName);
     if (!exists) {
-      throw new Error(`Stored procedure ${this.schema}.${methodName} does not exist.`);
+        throw new Error(`Stored procedure ${this.schema}.${methodName} does not exist.`);
+    }
+
+    if (parameters.length === 0) {
+        throw new Error(`Stored procedure ${this.schema}.${methodName} expects parameters but received none.`);
     }
 
     const placeholders = parameters.map((_, i) => `$${i + 1}`).join(",");
     const query = `CALL "${this.schema}"."${methodName}"(${placeholders})`;
 
+    logger.info(`Executing query: ${query} with parameters: ${JSON.stringify(parameters)}`);
+
     try {
-      const result = await this.db.raw(query, parameters);
-      logger.info("Stored procedure executed successfully:", result);
-      return result.rows[0]?.f_return_value;
+        const result = await this.db.raw(query, parameters);
+        logger.info("Stored procedure executed successfully:", result);
+        return result.rows[0]?.f_return_value;
     } catch (error) {
-      logger.log(`query parameter: ${parameters}`);
-      logger.error(`Error executing stored method: ${error}`);
-      throw new Error("Unable to execute transaction: " + error);
+        logger.error(`Error executing stored method: ${error}`);
+        throw new Error("Unable to execute transaction: " + error);
     } finally {
-      await this.db.destroy();
+        await this.db.destroy();
     }
   }
+
 }
