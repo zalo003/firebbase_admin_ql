@@ -1,82 +1,73 @@
 import { logger } from "firebase-functions/v2";
 import { Message } from "../utility";
+import knex, { Knex } from "knex";
 
 /**
  * The `PgDatabase` class provides a wrapper for interacting with a PostgreSQL database using Knex.js.
- * It is responsible for establishing a connection to the database, running stored procedures, and managing database transactions.
- * It is initialized with a schema and can execute stored procedures with parameters.
+ * It manages database connections, executes stored procedures, and ensures proper resource cleanup.
  */
 export class PgDatabase {
-  
-  /**
-   * The Knex.js instance used for interacting with the PostgreSQL database.
-   * @type {any}
-   */
-  private db: any;
+  private db: Knex; // Knex.js instance
+  private schema: string; // Database schema
 
   /**
-   * The schema in which the stored procedure resides.
-   * @type {string}
+   * Initializes a new instance of `PgDatabase` for PostgreSQL interactions.
+   * @param schema - The schema name where stored procedures reside.
+   * @param connectionOptions - The database connection options.
    */
-  private schema: string = "";
-
-  /**
-   * Creates an instance of `PgDatabase` for connecting to a PostgreSQL database.
-   * 
-   * @param {string} schema - The schema name where stored procedures or functions are located.
-   * 
-   * @example
-   * const pgDatabase = new PgDatabase("myschema");
-   */
-  constructor(
-    schema: string,
-    connectionOptions: any
-  ) {
-    // Initialize the Knex.js client with PostgreSQL connection options
-    this.db = require("knex")({
-      client: "pg",
-      connection: connectionOptions,
-    });;
+  constructor(schema: string, connectionOptions: Knex.Config) {
+    this.db = knex({ client: "pg", connection: connectionOptions });
     this.schema = schema;
   }
 
   /**
-   * Executes a stored procedure or function in the database.
-   * 
-   * @param {string} methodName - The name of the stored procedure or function to be executed.
-   * @param {Array<unknown>} parameters - An array of parameters to be passed to the stored procedure or function.
-   * @returns {Promise<Message>} A promise that resolves with the result of the stored procedure or function.
-   * 
-   * @throws {Error} Throws an error if the stored procedure fails to execute.
-   * 
-   * @example
-   * const result = await pgDatabase.runStoredMethod("myProcedure", [param1, param2]);
+   * Checks if a stored procedure exists in the database.
+   * @param methodName - The name of the stored procedure.
+   * @returns A boolean indicating whether the procedure exists.
    */
-  async runStoredMethod(
-    methodName: string, 
-    parameters: Array<any> = [] ): Promise<Message> {
+  private async procedureExists(methodName: string): Promise<boolean> {
+    const query = `
+      SELECT EXISTS (
+        SELECT 1 FROM pg_proc p
+        JOIN pg_namespace n ON p.pronamespace = n.oid
+        WHERE n.nspname = ? AND p.proname = ?
+      ) AS exists;
+    `;
     try {
-      // Construct the parameter placeholders for the SQL query
-      const placeholders = parameters.map(() => "?").join(",");
-
-      // Construct the SQL query string with the stored procedure name and parameter placeholders
-      const query = `CALL ${this.schema}.${methodName}(${placeholders})`;
-
-      // Run the stored procedure using Knex.js raw query method
-      const result = await this.db.raw(query, parameters);
-
-      // Log the result of the stored procedure execution
-      logger.log("logger log method result:", result);
-      
-      // Return the first result of the stored procedure's return value
-      return result.rows[0]["f_return_value"];
+      const result = await this.db.raw(query, [this.schema, methodName]);
+      return result.rows[0]?.exists || false;
     } catch (error) {
-      // Log and throw an error if the execution fails
-      logger.log("Error executing stored method:", error);
-      throw new Error("Unable to run current transaction: " + error);
+      logger.error(`Error checking procedure existence: ${error}`);
+      return false;
+    }
+  }
+
+  /**
+   * Executes a stored procedure in the database.
+   * @param methodName - The stored procedure name.
+   * @param parameters - Parameters to be passed to the procedure.
+   * @returns A promise resolving to the procedure's return value.
+   * @throws If the procedure does not exist or execution fails.
+   */
+  async runStoredMethod(methodName: string, parameters: any[] = []): Promise<Message> {
+    const exists = await this.procedureExists(methodName);
+    if (!exists) {
+      throw new Error(`Stored procedure ${this.schema}.${methodName} does not exist.`);
+    }
+
+    const placeholders = parameters.map((_, i) => `$${i + 1}`).join(",");
+    const query = `CALL "${this.schema}"."${methodName}"(${placeholders})`;
+
+    try {
+      const result = await this.db.raw(query, parameters);
+      logger.info("Stored procedure executed successfully:", result);
+      return result.rows[0]?.f_return_value;
+    } catch (error) {
+      logger.log(`query parameter: ${parameters}`);
+      logger.error(`Error executing stored method: ${error}`);
+      throw new Error("Unable to execute transaction: " + error);
     } finally {
-      // Close the database connection after executing the query
-      this.db.destroy();
+      await this.db.destroy();
     }
   }
 }
