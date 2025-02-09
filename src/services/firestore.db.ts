@@ -203,44 +203,49 @@ export class FirebaseModel {
       dbLabel,
       reference
     }: {
-      whereKey?: string | string[],
-      returnData: object,
-      dbLabel: string,
-      reference?: string
+      whereKey?: string | string[];
+      returnData: object;
+      dbLabel: string;
+      reference?: string;
     }): Promise<boolean | string> {
       try {
-        let ref = undefined;
-        if(reference){
-          ref = reference;
-        } else if(whereKey) {
+        const dataToBackup = (returnData as any)[dbLabel];
+    
+        // Ensure data is not null, undefined, empty object, or empty string before proceeding
+        if (!dataToBackup || (typeof dataToBackup === 'object' && Object.keys(dataToBackup).length === 0) || dataToBackup === '') {
+          return false;
+        }
+    
+        let ref = reference;
+        
+        if (!ref && whereKey) {
           const where: whereClause[] = [];
           if (typeof whereKey === "string") {
             where.push({
               key: whereKey,
               operator: "==",
-              value: (returnData as any)[dbLabel][whereKey],
+              value: dataToBackup[whereKey],
             });
           } else {
             whereKey.forEach((key) => {
               where.push({
                 key,
                 operator: "==",
-                value: (returnData as any)[dbLabel][key],
+                value: dataToBackup[key],
               });
             });
           }
           const itemExist = await this.findWhere({ wh: where });
-          if(itemExist.length > 0){
-            ref = itemExist[0].reference
+          if (itemExist.length > 0) {
+            ref = itemExist[0].reference;
           }
         }
-  
+    
         // Backup return value to Firestore
-        return await this.save((returnData as any)[dbLabel],  ref);
+        return await this.save(dataToBackup, ref);
       } catch (error) {
         logger.log("firestore backup error: ", error);
         return false;
       }
     }
-  }
-  
+  }    

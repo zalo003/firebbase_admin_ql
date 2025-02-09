@@ -43,41 +43,40 @@ export type Message = {
  * ensure that the values are returned in a specific order.
  */
 export class PgFormData {
-    private data: Record<string, any>;
-    private order: string[];
-  
-    /**
-     * Creates an instance of the PgFormData class.
-     *
-     * @param {object} data - The form data where keys are field names and values are the field values.
-     * @param {string[]} order - The order in which the values should be returned.
-     */
-    constructor(data: object, order: string[]) {
-      this.data = data;
-      this.order = order;
-    }
-  
-    /**
-     * Returns the form values in the specified order for database query purposes.
-     * 
-     * If a field's value is an object, it will be converted to a JSON string.
-     * If a field's value is `undefined`, it will be replaced with `null`.
-     *
-     * @returns {Array<any>} - The form values in the specified order, with `null` for undefined values and 
-     *                          JSON strings for objects.
-     */
-    get values(): Array<any> {
-      return this.order.map((key) => {
-        const value = this.data[key];
-        if (value === undefined) {
-          return null;
-        } else if (value !== null && typeof value === 'object') {
-          return JSON.stringify(value); // Stringify objects
-        }
-        return value;
-      });
-    }
+  private data: Record<string, any>;
+  private order: string[];
+
+  /**
+   * Creates an instance of the PgFormData class.
+   *
+   * @param {object} data - The form data where keys are field names and values are the field values.
+   * @param {string[]} order - The order in which the values should be returned.
+   */
+  constructor(data: object, order: string[]) {
+    this.data = data;
+    this.order = order;
   }
+
+  /**
+   * Returns the form values in the specified order for database query purposes.
+   * 
+   * If a field's value is an object, it will be converted to a JSON string.
+   * If a field's value is `undefined` or missing, it will be replaced with `null`.
+   *
+   * @returns {Array<any>} - The form values in the specified order, with `null` for undefined values and 
+   *                          JSON strings for objects.
+   */
+  get values(): Array<any> {
+    return this.order.map((key) => {
+      if (!(key in this.data)) {
+        return null; // Ensure all keys in order exist in the output
+      }
+
+      const value = this.data[key];
+      return value !== null && typeof value === "object" ? JSON.stringify(value) : value;
+    });
+  }
+}
 
  
 
