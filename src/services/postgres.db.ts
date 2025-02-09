@@ -87,6 +87,7 @@ export class PgBaseModel extends PgDatabase {
         } catch (error) {
             // Log and handle errors
             logger.error('pg call error: ', error);
+            logger.error('db data: ', dbData);
             return {
                 status: 'error',
                 message: 'Unable to complete process'
