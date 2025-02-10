@@ -49,20 +49,21 @@ export class PgDatabase {
    * @returns A promise resolving to the procedure's return value.
    * @throws If the procedure does not exist or execution fails.
    */
-  async runStoredMethod(methodName: string, parameters: any[] = []): Promise<Message> {
+  async runStoredMethod(methodName: string, parameters: any[]): Promise<Message> {
     const exists = await this.procedureExists(methodName);
     if (!exists) {
         throw new Error(`Stored procedure ${this.schema}.${methodName} does not exist.`);
     }
 
-    if (parameters.length === 0) {
+    if (!Array.isArray(parameters) || parameters.length === 0) {
         throw new Error(`Stored procedure ${this.schema}.${methodName} expects parameters but received none.`);
     }
 
-    const placeholders = parameters.map((_, i) => `$${i + 1}`).join(",");
-    const query = `CALL "${this.schema}"."${methodName}"(${placeholders})`;
+    const placeholders = parameters.map(() => "?").join(",");
+    const query = `CALL ${this.schema}.${methodName}(${placeholders})`;
 
-    logger.info(`Executing query: ${query} with parameters: ${JSON.stringify(parameters)}`);
+    logger.info(`Executing SQL: ${query}`);
+    logger.info(`With parameters: ${JSON.stringify(parameters)}`);
 
     try {
         const result = await this.db.raw(query, parameters);
@@ -74,6 +75,7 @@ export class PgDatabase {
     } finally {
         await this.db.destroy();
     }
-  }
+}
+
 
 }
