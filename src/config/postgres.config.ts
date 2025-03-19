@@ -21,9 +21,9 @@ export class PgDatabase {
       connection: connectionOptions,
       pool: {
         min: 2, // Minimum connections in the pool
-        max: 10, // Maximum connections in the pool
-        idleTimeoutMillis: 30000, // Close idle connections after 30s
-        acquireTimeoutMillis: 2000, // Wait 2s before failing
+        max: 20, // Maximum connections in the pool
+        idleTimeoutMillis: 15000, // Close idle connections after 15s
+        acquireTimeoutMillis: 5000, // Wait 2s before failing
       }
     });
     this.schema = schema;
@@ -81,7 +81,9 @@ export class PgDatabase {
     } catch (error) {
         logger.error(`Error executing stored method: ${error}`);
         throw new Error("Unable to execute transaction: " + error);
-    } 
+    } finally {
+      this.db.destroy();
+    }
 }
 
 
