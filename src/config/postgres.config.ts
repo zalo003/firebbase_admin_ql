@@ -16,7 +16,16 @@ export class PgDatabase {
    * @param connectionOptions - The database connection options.
    */
   constructor(schema: string, connectionOptions: Knex.Config) {
-    this.db = knex({ client: "pg", connection: connectionOptions });
+    this.db = knex({ 
+      client: "pg", 
+      connection: connectionOptions,
+      pool: {
+        min: 2, // Minimum connections in the pool
+        max: 10, // Maximum connections in the pool
+        idleTimeoutMillis: 30000, // Close idle connections after 30s
+        acquireTimeoutMillis: 2000, // Wait 2s before failing
+      }
+    });
     this.schema = schema;
   }
 
@@ -72,9 +81,7 @@ export class PgDatabase {
     } catch (error) {
         logger.error(`Error executing stored method: ${error}`);
         throw new Error("Unable to execute transaction: " + error);
-    } finally {
-        await this.db.destroy();
-    }
+    } 
 }
 
 

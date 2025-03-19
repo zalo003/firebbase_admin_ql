@@ -86,7 +86,7 @@ export class FirebaseModel {
           }
           return results;
         } else {
-          return (await this.collection.get()).docs;
+          return (await this.collection.get()).docs.data();
         }
       } catch (error) {
         logger.log("findAll: ", error);
