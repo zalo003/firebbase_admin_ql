@@ -86,7 +86,14 @@ export class FirebaseModel {
           }
           return results;
         } else {
-          return (await this.collection.get()).docs.data();
+         const snapshots: QuerySnapshot = await this.collection.get();
+         if(snapshots.empty){
+          return [];
+         }
+          const result = snapshots.docs.map((document)=>{
+            return {...document.data(), reference: document.id}
+        })
+         return result;
         }
       } catch (error) {
         logger.log("findAll: ", error);
