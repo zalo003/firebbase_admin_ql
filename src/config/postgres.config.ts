@@ -1,6 +1,6 @@
 import { logger } from "firebase-functions/v2";
 import { Message } from "../utility";
-import knex, { Knex } from "knex";
+import { Knex } from "knex";
 
 /**
  * The `PgDatabase` class provides a wrapper for interacting with a PostgreSQL database using Knex.js.
@@ -15,17 +15,8 @@ export class PgDatabase {
    * @param schema - The schema name where stored procedures reside.
    * @param connectionOptions - The database connection options.
    */
-  constructor(schema: string, connectionOptions: Knex.Config) {
-    this.db = knex({ 
-      client: "pg", 
-      connection: connectionOptions,
-      pool: {
-        min: 2, // Minimum connections in the pool
-        max: 20, // Maximum connections in the pool
-        idleTimeoutMillis: 15000, // Close idle connections after 15s
-        acquireTimeoutMillis: 5000, // Wait 2s before failing
-      }
-    });
+  constructor(schema: string, dbInstance: Knex) {
+    this.db = dbInstance;
     this.schema = schema;
   }
 
@@ -81,9 +72,7 @@ export class PgDatabase {
     } catch (error) {
         logger.error(`Error executing stored method: ${error}`);
         throw new Error("Unable to execute transaction: " + error);
-    } finally {
-      this.db.destroy();
-    }
+    } 
 }
 
 
