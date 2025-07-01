@@ -1,4 +1,6 @@
+import { logger } from "firebase-functions/v2";
 import { Message } from "../utility";
+import { CallableRequest, onCall, CallableFunction } from "firebase-functions/https";
 
 /**
  * Middleware function to verify if the request is from an App Check verified app.
@@ -70,4 +72,61 @@ export const chainMiddlewares = async (
   };
   return await execute(0); // Start the middleware chain
 };
+
+
+/**
+ * A wrapper function for Firebase Callable Functions with optional authentication and middleware support.
+ * 
+ * @param callback {(request: CallableRequest<any>) => Promise<Message>} - 
+ *        The main function to execute after middleware processing. It should accept a CallableRequest object and return a Promise of type Message.
+ * 
+ * @param withAuth {boolean} [optional] - 
+ *        A boolean indicating whether the function should enforce user authentication using `isAuthorizedUser`. Defaults to false.
+ * 
+ * @returns {CallableFunction<any, Promise<Message | { status: string; message: string }>, unknown>} - 
+ *          A Firebase Callable Function with middleware for app confirmation and optional user authentication.
+ */
+export const callableFunctionWrapper = (callback: (request: CallableRequest<any>)=>Promise<Message>, withAuth: boolean = false): CallableFunction<any, Promise<Message | { status: string; message: string; data?: any}>, unknown> => {
+    return onCall(
+      {
+        timeoutSeconds: 120,
+        enforceAppCheck: true,
+      },
+      async (request) => {
+        try {
+            const middleWares = [
+                (req: CallableRequest<any>, next: ()=>void) =>
+                isConfirmedApp(req.app, next),
+            ];
+            if(withAuth) middleWares.push(
+                (req: CallableRequest<any>, next: ()=>void) =>
+                isAuthorizedUser(req.auth, next),
+            )
+          return await chainMiddlewares(
+            middleWares,
+            request,
+            async () => {
+              try {
+                return await callback(request);
+              } catch (error) {
+                logger.log("callableFunctionWrapper: ", error);
+                return {
+                  status: "error",
+                  message: "Unable to conclude process",
+                };
+              }
+            }
+          );
+        } catch (error) {
+            logger.log("init error: ", error);
+          return {
+            status: "error",
+            message: "Poor network connections!",
+          };
+        }
+      }
+    );
+    
+}
+
 

@@ -3,6 +3,7 @@ import { PgDatabase } from "../config/postgres.config";
 import { Message, PgFormData } from "../utility";
 import { FirebaseModel } from "./firestore.db";
 import { logger } from "firebase-functions/v2";
+import { Knex } from "knex";
 
 type PgBackup = {
     backupDb: string, 
@@ -43,8 +44,8 @@ export class PgBaseModel extends PgDatabase {
      * @param {string} procedure - The name of the stored procedure to be executed.
      * @param {string[]} order - The order of the parameters to be passed to the stored procedure.
      */
-    constructor(schema: string, procedure: string, order: string[], connectionOptions: any, firestoreDB: Firestore) {
-        super(schema, connectionOptions);
+    constructor(schema: string, procedure: string, order: string[], dbInstance: Knex, firestoreDB: Firestore) {
+        super(schema, dbInstance);
         this.procedure = procedure;
         this.order = order;
         this.firestoreDB = firestoreDB;

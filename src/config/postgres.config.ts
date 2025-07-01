@@ -72,7 +72,9 @@ export class PgDatabase {
     } catch (error) {
         logger.error(`Error executing stored method: ${error}`);
         throw new Error("Unable to execute transaction: " + error);
-    } 
+    } finally {
+      this.db.destroy();
+    }
 }
 
 
